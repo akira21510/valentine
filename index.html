@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<title>Valentine 💖</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+html,body{
+    height:100%;
+    overflow:hidden;
+    touch-action:none;
+}
+
+body{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display",
+                "Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+    background:linear-gradient(-45deg,
+        #ff9a9e,
+        #ffb199,
+        #ff758c,
+        #ffa07a,
+        #ff9a9e);
+    background-size:400% 400%;
+    animation:gradient 14s ease infinite;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:radial-gradient(circle at center,
+        transparent 60%,
+        rgba(255,60,120,0.35) 100%);
+    z-index:1;
+}
+
+@keyframes gradient{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
+
+/* card */
+.container{
+    position:relative;
+    z-index:2;
+    width:min(650px,92%);
+    padding:70px 50px;
+    border-radius:35px;
+    text-align:center;
+
+    backdrop-filter:blur(25px);
+    -webkit-backdrop-filter:blur(25px);
+
+    background:rgba(255,255,255,0.22);
+
+    box-shadow:
+        0 25px 70px rgba(255,70,140,0.45),
+        0 0 60px rgba(255,100,160,0.35);
+
+    transition:transform 0.4s ease, opacity 0.3s ease;
+}
+
+.container:hover{
+    transform:rotateX(3deg) rotateY(-3deg);
+}
+
+h1{
+    font-size:clamp(22px,3vw,30px);
+    font-weight:600;
+    color:#ffffff;
+    margin-bottom:30px;
+}
+
+.pulse-heart{
+    font-size:80px;
+    margin-bottom:20px;
+    animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.35);}
+    100%{transform:scale(1);}
+}
+
+/* buttons */
+.buttons{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:40px;
+    margin-top:40px;
+    transition:opacity 0.3s ease;
+}
+
+button{
+    width:190px;
+    height:60px;
+    font-size:20px;
+    font-weight:600;
+    border-radius:50px;
+    border:none;
+    cursor:pointer;
+    white-space:nowrap;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:transform 0.25s ease;
+}
+
+#yesBtn{
+    background:rgba(255,46,99,0.95);
+    color:white;
+    animation:yesGlow 2.5s ease-in-out infinite;
+}
+
+@keyframes yesGlow{
+    0%{box-shadow:0 0 20px rgba(255,46,99,0.5);}
+    50%{box-shadow:0 0 45px rgba(255,46,99,0.9);}
+    100%{box-shadow:0 0 20px rgba(255,46,99,0.5);}
+}
+
+/* popup */
+.popup{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s ease;
+}
+
+.popup.active{
+    opacity:1;
+    pointer-events:auto;
+}
+
+.popup-content{
+    background:white;
+    padding:90px;
+    border-radius:40px;
+    text-align:center;
+    font-size:26px;
+    font-weight:600;
+    width:60%;
+    max-width:800px;
+    animation:pop 0.4s ease;
+}
+
+@keyframes pop{
+    from{transform:scale(0.7);opacity:0;}
+    to{transform:scale(1);opacity:1;}
+}
+
+/* hearts */
+.heart{
+    position:fixed;
+    bottom:-50px;
+    animation:floatUp linear infinite;
+    z-index:0;
+}
+
+@keyframes floatUp{
+    to{
+        transform:translateY(-120vh);
+        opacity:0;
+    }
+}
+
+/* mobile */
+@media(max-width:600px){
+
+    .popup-content{
+        width:85%;
+        font-size:22px;
+        padding:60px 35px;
+    }
+
+    .buttons{
+        gap:20px;
+    }
+
+    button{
+        width:160px;
+        height:52px;
+        font-size:18px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="container">
+    <div class="pulse-heart">💖</div>
+    <h1>Will you be my Valentine, furasek? &lt;3</h1>
+
+    <div class="buttons" id="buttons">
+        <button id="yesBtn">Yes 💕</button>
+        <button id="noBtn">No 🙄🙄</button>
+    </div>
+</div>
+
+<div class="popup" id="popup">
+    <div class="popup-content">
+        YEYYY! I knew you would agree :333 💘<br><br>
+        I love you My Kitty &lt;&lt;3
+    </div>
+</div>
+
+<script>
+const noBtn = document.getElementById("noBtn");
+const yesBtn = document.getElementById("yesBtn");
+const popup = document.getElementById("popup");
+const buttons = document.getElementById("buttons");
+
+let yesScale = 1;
+let activated = false;
+
+// Запоминаем начальные позиции кнопок
+const yesInitialTransform = yesBtn.style.transform;
+const noInitialStyle = {
+    left: noBtn.offsetLeft + "px",
+    top: noBtn.offsetTop + "px",
+    position: noBtn.style.position,
+    transition: noBtn.style.transition
+};
+
+function activateNoButton(){
+    if(activated) return;
+    activated = true;
+
+    const rect = noBtn.getBoundingClientRect();
+    noBtn.style.position = "fixed";
+    noBtn.style.left = rect.left + "px";
+    noBtn.style.top = rect.top + "px";
+}
+
+function moveNoButton(){
+    activateNoButton();
+
+    // Увеличиваем кнопку Да
+    yesScale += 0.12;
+    yesBtn.style.transform = `scale(${yesScale})`;
+
+    const padding = 10; // отступ от краев
+    const vw = document.documentElement.clientWidth;
+    const vh = document.documentElement.clientHeight;
+
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+
+    // Ограничиваем случайные координаты, чтобы кнопка не выходила за экран
+    let randomX = Math.random() * (vw - btnW - padding*2) + padding;
+    let randomY = Math.random() * (vh - btnH - padding*2) + padding;
+
+    // Плавное перемещение к новой позиции
+    noBtn.style.transition = "left 0.18s ease, top 0.18s ease";
+    noBtn.style.left = randomX + "px";
+    noBtn.style.top = randomY + "px";
+}
+
+
+noBtn.addEventListener("mouseenter", moveNoButton);
+noBtn.addEventListener("touchstart", e=>{
+    e.preventDefault();
+    moveNoButton();
+});
+
+yesBtn.addEventListener("click", ()=>{
+    popup.classList.add("active");
+    buttons.style.opacity = "0";
+    buttons.style.pointerEvents = "none";
+});
+
+popup.addEventListener("click", ()=>{
+    popup.classList.remove("active");
+    buttons.style.opacity = "1";
+    buttons.style.pointerEvents = "auto";
+
+    // Плавно возвращаем кнопки в исходное состояние
+    yesBtn.style.transform = yesInitialTransform;
+
+    noBtn.style.transition = "left 0.4s ease, top 0.4s ease";
+    noBtn.style.left = noInitialStyle.left;
+    noBtn.style.top = noInitialStyle.top;
+    noBtn.style.position = noInitialStyle.position;
+
+    // Сбрасываем флаг и масштаб кнопки Yes
+    activated = false;
+    yesScale = 1;
+});
+
+/* 💖 сердечки */
+function createHeart(initial=false){
+    const heart=document.createElement("div");
+    heart.classList.add("heart");
+    heart.innerHTML="💖";
+    heart.style.left=Math.random()*100+"vw";
+    heart.style.fontSize=(20+Math.random()*25)+"px";
+    heart.style.animationDuration=(4+Math.random()*3)+"s";
+
+    if(initial){
+        heart.style.bottom=Math.random()*100+"vh";
+    }
+
+    document.body.appendChild(heart);
+    setTimeout(()=>heart.remove(),7000);
+}
+
+for(let i=0;i<30;i++){createHeart(true);}
+setInterval(()=>createHeart(false),400);
+
+</script>
+
+</body>
+</html>
